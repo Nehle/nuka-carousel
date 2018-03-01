@@ -65,7 +65,7 @@ const Carousel = createReactClass({
     edgeEasing: PropTypes.string,
     frameOverflow: PropTypes.string,
     framePadding: PropTypes.string,
-    heightMode : PropTypes.oneOf(['first', 'max']),
+    heightMode : PropTypes.oneOf(['first', 'max', 'auto']),
     initialSlideHeight: PropTypes.number,
     initialSlideWidth: PropTypes.number,
     needRecalculateHeight: PropTypes.bool,
@@ -142,14 +142,22 @@ const Carousel = createReactClass({
     }
   },
 
-  componentWillUpdate() {
-    if (this.props.needRecalculateHeight) {
+  componentWillUpdate(nextProps, nextState) {
+    if (this.props.needRecalculateHeight && this.props.heightMode == 'max') {
       var height = this.findMaxHeightSlide(this.refs.frame.childNodes[0].childNodes);
       if (this.state.slideHeight !== height) {
         this.setDimensions(this.props);
       }
     }
+
+    if (this.props.needRecalculateHeight && this.props.heightMode == 'auto') {
+      var height = this.refs.frame.childNodes[0].childNodes[this.state.currentSlide].offsetHeight;
+      if (this.state.slideHeight !== height) {
+        this.setDimensions(this.props);
+      }
+    }
   },
+
 
   componentWillReceiveProps(nextProps) {
     this.setState({
@@ -531,10 +539,11 @@ const Carousel = createReactClass({
       {
         currentSlide: index
       },
-      () => {
-        this.animateSlide();
-        this.resetAutoplay();
-        this.setExternalData();
+      function() {
+        self.animateSlide();
+        self.resetAutoplay();
+        self.setExternalData();
+        self.setDimensions(this.props);
       }
     );
   },
@@ -735,6 +744,10 @@ const Carousel = createReactClass({
       }
     } else {
       slideHeight = 100;
+    }
+
+    if (props.heightMode === 'auto'){
+      slideHeight = frame.childNodes[0].childNodes[this.state.currentSlide].offsetHeight;
     }
 
     if (typeof props.slideWidth !== 'number') {
