@@ -71,6 +71,11 @@ const DefaultDecorators = [
     component: createReactClass({
       getIndexes(count, inc) {
         const arr = [];
+        if ((inc === 0 && count !== 0) || inc !== inc) {
+          throw new Error(
+            `Don't build infinite indices please ${count},${inc}`
+          );
+        }
         for (let i = 0; i < count; i += inc) {
           arr.push(i);
         }

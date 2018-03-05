@@ -1,8 +1,18 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import Carousel from '../../src';
+import sinon from 'sinon';
 
 describe('<Carousel />', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   describe('Rendering and Mounting', () => {
     it('should correctly mount with children.', () => {
       const wrapper = mount(
@@ -134,71 +144,79 @@ describe('<Carousel />', () => {
       );
     });
 
-    it('should set slidesToScroll to 2 if slideWidth is 250px and slidesToScroll is auto',
-      () => {
-        const component = mount(
-          React.createElement(Carousel, {slideWidth: '250px', width: '600px', slidesToScroll: 'auto'},
-            React.createElement('p', {className: 'test-slide'}, 'Slide 1'),
-            React.createElement('p', null, 'Slide 2'),
-            React.createElement('p', null, 'Slide 3')
-          )
-        );
-
-        expect(component.state.slidesToScroll).to.equal(2);
+    it('should set slidesToScroll to 2 if slideWidth is 250px and slidesToScroll is auto', () => {
+      sandbox.stub(Carousel.prototype, 'getFrameSize').returns({
+        width: 600,
+        height: 300
       });
 
-    it('should set slidesToScroll to 3 with slideWidth: 100px, cellSpacing: 100, slidesToScroll:auto',
-      () => {
-        const component = mount(
-          React.createElement(Carousel, {
-            slideWidth: '100px',
-            width: '600px',
-            cellSpacing: 100,
-            slidesToScroll: 'auto'
-          },
-            React.createElement('p', {className: 'test-slide'}, 'Slide 1'),
-            React.createElement('p', null, 'Slide 2'),
-            React.createElement('p', null, 'Slide 3')
-          )
-        );
+      const wrapper = mount(
+        <Carousel slideWidth="250px" width="600px" slidesToScroll="auto">
+          <p className="test-slide">Slide 1</p>
+          <p>Slide 2</p>
+          <p>Slide 3</p>
+        </Carousel>
+      );
 
-        expect(component.state.slidesToScroll).to.equal(3);
+      expect(wrapper.state().slidesToScroll).toEqual(2);
+    });
+
+    it('should set slidesToScroll to 3 with slideWidth: 100px, cellSpacing: 100, slidesToScroll:auto', () => {
+      sandbox.stub(Carousel.prototype, 'getFrameSize').returns({
+        width: 600,
+        height: 300
       });
+      const wrapper = mount(
+        <Carousel
+          slideWidth="100px"
+          width="600px"
+          cellSpacing={100}
+          slidesToScroll="auto"
+        >
+          <p className="test-slide">Slide 1</p>
+          <p>Slide 2</p>
+          <p>Slide 3</p>
+        </Carousel>
+      );
 
-    it('should set slidesToScroll to 6 if slideWidth is 100px and slidesToScroll is auto',
-      () => {
-        const component = mount(
-          <Carousel slideWidth={'100px'} width={'600px'} slidesToScroll={'auto'}>
-            <p className='test-slide'>Slide 1</p>,
-            <p>Slide 2</p>
-            <p>Slide 3</p>
-          </Carousel>
-        );
+      expect(wrapper.state().slidesToScroll).toEqual(3);
+    });
 
-        expect(component.state.slidesToScroll).to.equal(6);
+    it('should set slidesToScroll to 6 if slideWidth is 100px and slidesToScroll is auto', () => {
+      sandbox.stub(Carousel.prototype, 'getFrameSize').returns({
+        width: 600,
+        height: 300
       });
+      const component = mount(
+        <Carousel slideWidth={'100px'} width={'600px'} slidesToScroll={'auto'}>
+          <p className="test-slide">Slide 1</p>,
+          <p>Slide 2</p>
+          <p>Slide 3</p>
+        </Carousel>
+      );
 
-    it('should set prop heightMode is "first" by default',
-        () => {
-          const component = mount(
-              <Carousel>
-                <p className="test-slide">Slide 1</p>
-                </Carousel>
-              );
+      expect(component.state().slidesToScroll).toEqual(6);
+    });
 
-          expect(component.props.heightMode).to.equal('first');
-        });
+    it('should set prop heightMode is "first" by default', () => {
+      const component = mount(
+        <Carousel>
+          <p className="test-slide">Slide 1</p>
+        </Carousel>
+      );
 
-    it('should shouldRecalculateHeight is false by default',
-        () => {
-          const component = mount(
-              <Carousel>
-                <p className='test-slide'>Slide 1</p>
-              </Carousel>
-          );
+      expect(component.props().heightMode).toEqual('first');
+    });
 
-          expect(component.props.shouldRecalculateHeight).to.equal(false);
-        });
+    it('should shouldRecalculateHeight is false by default', () => {
+      const component = mount(
+        <Carousel>
+          <p className="test-slide">Slide 1</p>
+        </Carousel>
+      );
+
+      expect(component.props().shouldRecalculateHeight).toEqual(false);
+    });
   });
 
   describe('methods', () => {
@@ -271,38 +289,37 @@ describe('<Carousel />', () => {
       expect(wrapper.state().currentSlide).toEqual(2);
     });
 
-    it('should correct find slide with max height', () => {
+    it('should correctly find slide with max height', () => {
       const component = mount(
-          <Carousel heightMode='max'>
-              <div style={{height: '200px'}}>'Slide 1</div>,
-              <div style={{height: '300px'}}>'Slide 2</div>,
-              <div style={{height: '400px'}}>'Slide 3</div>,
-              <div style={{height: '300px'}}>'Slide 4</div>,
-              <div style={{height: '200px'}}>'Slide 5</div>,
-          </Carousel>
+        <Carousel heightMode="max">
+          <div style={{ height: '200px' }}>'Slide 1</div>,
+          <div style={{ height: '300px' }}>'Slide 2</div>,
+          <div style={{ height: '400px' }}>'Slide 3</div>,
+          <div style={{ height: '300px' }}>'Slide 4</div>,
+          <div style={{ height: '200px' }}>'Slide 5</div>,
+        </Carousel>
       );
 
-      expect(component.state.slideHeight).to.equal(400);
+      expect(component.state().slideHeight).toEqual(400);
     });
 
-    it('should correct recalculate height when child is update', () => {
+    it('should correctly recalculate height when children are updated', () => {
       const component = mount(
-          <Carousel heightMode='max' shouldRecalculateHeight>
-              <div style={{height: '200px'}}>'Slide 1</div>
-              <div style={{height: '300px'}}>'Slide 2</div>
-              <div style={{height: '400px'}}>'Slide 3</div>
-              <div style={{height: '300px'}}>'Slide 4</div>
-              <div style={{height: '200px'}}>'Slide 5</div>
-          </Carousel>
+        <Carousel heightMode="max" shouldRecalculateHeight>
+          <div style={{ height: '200px' }}>'Slide 1</div>
+          <div style={{ height: '300px' }}>'Slide 2</div>
+          <div style={{ height: '400px' }}>'Slide 3</div>
+          <div style={{ height: '300px' }}>'Slide 4</div>
+          <div style={{ height: '200px' }}>'Slide 5</div>
+        </Carousel>
       );
 
-      const frame = component.refs.frame;
+      const frame = component.instance().frame;
       const thirdSlide = frame.childNodes[0].childNodes[2];
       thirdSlide.style.height = '600px';
-      component.forceUpdate();
+      component.update();
 
-      expect(component.state.slideHeight).to.equal(600);
+      expect(component.state().slideHeight).toEqual(600);
     });
-
   });
 });
